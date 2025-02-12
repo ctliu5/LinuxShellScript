@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 一鍵安裝 Docker 腳本
+# 一鍵安裝 Docker 腳本（適用於 Ubuntu）
 set -e
 
 # 移除可能衝突的套件
