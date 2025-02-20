@@ -186,7 +186,7 @@ info "=== 5. 設定 logrotate ==="
 
 if [ -f "${LOGROTATE_CONF}" ]; then
   # 這裡可檢查檔案內容是否含有關鍵字
-  if grep -q "${BASE_DIR}/redis/logs/log_redis-server_master.log" "${LOGROTATE_CONF}"; then
+  if grep -q "${BASE_DIR}/redis/logs/log_redis-server.log" "${LOGROTATE_CONF}"; then
     info "logrotate 配置檔已存在且含有 redis logs (略過)。"
   else
     warn "偵測到 /etc/logrotate.d/redis 存在，但不含預期設定，請自行檢查或手動更新。"
@@ -194,7 +194,7 @@ if [ -f "${LOGROTATE_CONF}" ]; then
 else
   info "建立 /etc/logrotate.d/redis 配置..."
   sudo bash -c "cat <<EOF > ${LOGROTATE_CONF}
-/home/${USER_NAME}/redis_server/redis/logs/log_redis-server_master.log {
+/home/${USER_NAME}/redis_server/redis/logs/log_redis-server.log {
     su root root
     rotate 10
     compress
