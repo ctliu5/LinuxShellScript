@@ -60,6 +60,7 @@ if [ -z "${RUNNING}" ]; then
     --name "${CONTAINER_NAME}" \
     ${PORT_MAPPING} \
     -d \
+    --restart unless-stopped \
     -e REDIS_ARGS="${REDIS_ARGS}" \
     "${IMAGE_NAME}"
   
