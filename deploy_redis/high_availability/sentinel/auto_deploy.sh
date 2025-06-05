@@ -84,42 +84,60 @@ else
   info "資料夾已存在: ${BASE_DIR}/config (略過)"
 fi
 
-# ------------------ Step 2: 複製配置檔 ------------------
+# ------------------ Step 2: 複製設定檔（含覆蓋提示） ------------------
 info "=== 2. 複製設定檔  ==="
 
 # redis.conf
 if [ -f "${BASE_DIR}/redis.conf" ]; then
-  cp -i "${BASE_DIR}/redis.conf" "${BASE_DIR}/config/redis.conf"
-  success "已配置 redis.conf -> config/redis.conf"
-elif [ -f "${BASE_DIR}/config/redis.conf" ]; then
-  info "config/redis.conf 已存在 (略過)"
+  if [ -f "${BASE_DIR}/config/redis.conf" ]; then
+    echo "config/redis.conf 已存在，是否要覆蓋？(y/n)"
+    read -r ans
+    if [[ "$ans" =~ ^[Yy]$ ]]; then
+      cp "${BASE_DIR}/redis.conf" "${BASE_DIR}/config/redis.conf"
+      success "已覆蓋 config/redis.conf"
+    else
+      info "使用者選擇不覆蓋 config/redis.conf"
+    fi
+  else
+    cp "${BASE_DIR}/redis.conf" "${BASE_DIR}/config/redis.conf"
+    success "已複製 redis.conf -> config/redis.conf"
+  fi
 else
   warn "未找到 redis.conf，無法複製，請確認檔案位置。"
 fi
 
 # sentinel.conf
 if [ -f "${BASE_DIR}/sentinel.conf" ]; then
-  cp -i "${BASE_DIR}/sentinel.conf" "${BASE_DIR}/sentinel/redis-sentinel/conf/sentinel.conf"
-  success "已配置 sentinel.conf -> sentinel/redis-sentinel/conf/sentinel.conf"
-elif [ -f "${BASE_DIR}/sentinel/redis-sentinel/conf/sentinel.conf" ]; then
-  info "sentinel/redis-sentinel/conf/sentinel.conf 已存在 (略過)"
+  if [ -f "${BASE_DIR}/sentinel/redis-sentinel/conf/sentinel.conf" ]; then
+    echo "sentinel/redis-sentinel/conf/sentinel.conf 已存在，是否要覆蓋？(y/n)"
+    read -r ans
+    if [[ "$ans" =~ ^[Yy]$ ]]; then
+      cp "${BASE_DIR}/sentinel.conf" "${BASE_DIR}/sentinel/redis-sentinel/conf/sentinel.conf"
+      success "已覆蓋 sentinel/redis-sentinel/conf/sentinel.conf"
+    else
+      info "使用者選擇不覆蓋 sentinel.conf"
+    fi
+  else
+    cp "${BASE_DIR}/sentinel.conf" "${BASE_DIR}/sentinel/redis-sentinel/conf/sentinel.conf"
+    success "已複製 sentinel.conf -> sentinel/redis-sentinel/conf/sentinel.conf"
+  fi
 else
   warn "未找到 sentinel.conf，無法複製，請確認檔案位置。"
 fi
 
-# ------------------ Step 3: 檢查並(選擇性)移除舊容器 ------------------
+# ------------------ Step 3: 檢查並互動式移除舊容器 ------------------
 info "=== 3. 檢查容器狀態 (redis-stack, redis-sentinel) ==="
 
 # redis-stack
 EXIST_STACK=$(docker ps -a --format '{{.Names}}' | grep "^redis-stack$")
 if [ -n "$EXIST_STACK" ]; then
-  # 容器已經存在
-  if [ "$REMOVE_OLD_CONTAINERS" = "true" ]; then
-    info "偵測到 redis-stack 容器存在，REMOVE_OLD_CONTAINERS=true，將移除舊容器..."
+  echo "redis-stack 容器已存在，是否要移除並重新建立？(y/n)"
+  read -r ans
+  if [[ "$ans" =~ ^[Yy]$ ]]; then
     docker rm -f redis-stack &>/dev/null
-    success "舊的 redis-stack 容器已移除。"
+    success "已移除舊的 redis-stack 容器"
   else
-    info "redis-stack 容器已存在，且 REMOVE_OLD_CONTAINERS=false，不執行移除。"
+    info "使用者選擇保留 redis-stack 容器"
   fi
 else
   info "尚未建立 redis-stack 容器 (稍後將新建)。"
@@ -128,12 +146,13 @@ fi
 # redis-sentinel
 EXIST_SENTINEL=$(docker ps -a --format '{{.Names}}' | grep "^redis-sentinel$")
 if [ -n "$EXIST_SENTINEL" ]; then
-  if [ "$REMOVE_OLD_CONTAINERS" = "true" ]; then
-    info "偵測到 redis-sentinel 容器存在，REMOVE_OLD_CONTAINERS=true，將移除舊容器..."
+  echo "redis-sentinel 容器已存在，是否要移除並重新建立？(y/n)"
+  read -r ans
+  if [[ "$ans" =~ ^[Yy]$ ]]; then
     docker rm -f redis-sentinel &>/dev/null
-    success "舊的 redis-sentinel 容器已移除。"
+    success "已移除舊的 redis-sentinel 容器"
   else
-    info "redis-sentinel 容器已存在，且 REMOVE_OLD_CONTAINERS=false，不執行移除。"
+    info "使用者選擇保留 redis-sentinel 容器"
   fi
 else
   info "尚未建立 redis-sentinel 容器 (稍後將新建)。"
