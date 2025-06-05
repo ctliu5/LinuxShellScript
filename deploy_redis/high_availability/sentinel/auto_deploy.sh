@@ -70,6 +70,8 @@ fi
 if [ ! -d "${BASE_DIR}/sentinel/redis-sentinel/logs" ]; then
   mkdir -p "${BASE_DIR}/sentinel/redis-sentinel/logs"
   success "建立資料夾: ${BASE_DIR}/sentinel/redis-sentinel/logs"
+  info "=== [修復] 修正 redis-sentinel logs 權限 (給 UID 1001 可寫) ==="
+  sudo chown -R 1001:1001 "${BASE_DIR}/sentinel"
 else
   info "資料夾已存在: ${BASE_DIR}/sentinel/redis-sentinel/logs (略過)"
 fi
@@ -83,12 +85,12 @@ else
 fi
 
 # ------------------ Step 2: 複製配置檔 ------------------
-info "=== 2. 複製設定檔 (若不存在才複製) ==="
+info "=== 2. 複製設定檔  ==="
 
 # redis.conf
-if [ -f "${BASE_DIR}/redis.conf" ] && [ ! -f "${BASE_DIR}/config/redis.conf" ]; then
-  cp "${BASE_DIR}/redis.conf" "${BASE_DIR}/config/redis.conf"
-  success "已複製 redis.conf -> config/redis.conf"
+if [ -f "${BASE_DIR}/redis.conf" ]; then
+  cp -i "${BASE_DIR}/redis.conf" "${BASE_DIR}/config/redis.conf"
+  success "已配置 redis.conf -> config/redis.conf"
 elif [ -f "${BASE_DIR}/config/redis.conf" ]; then
   info "config/redis.conf 已存在 (略過)"
 else
@@ -96,9 +98,9 @@ else
 fi
 
 # sentinel.conf
-if [ -f "${BASE_DIR}/sentinel.conf" ] && [ ! -f "${BASE_DIR}/sentinel/redis-sentinel/conf/sentinel.conf" ]; then
-  cp "${BASE_DIR}/sentinel.conf" "${BASE_DIR}/sentinel/redis-sentinel/conf/sentinel.conf"
-  success "已複製 sentinel.conf -> sentinel/redis-sentinel/conf/sentinel.conf"
+if [ -f "${BASE_DIR}/sentinel.conf" ]; then
+  cp -i "${BASE_DIR}/sentinel.conf" "${BASE_DIR}/sentinel/redis-sentinel/conf/sentinel.conf"
+  success "已配置 sentinel.conf -> sentinel/redis-sentinel/conf/sentinel.conf"
 elif [ -f "${BASE_DIR}/sentinel/redis-sentinel/conf/sentinel.conf" ]; then
   info "sentinel/redis-sentinel/conf/sentinel.conf 已存在 (略過)"
 else
