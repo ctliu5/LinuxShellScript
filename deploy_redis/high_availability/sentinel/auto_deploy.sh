@@ -108,8 +108,11 @@ if [ -f "${BASE_DIR}/sentinel.conf" ]; then
     echo "sentinel/redis-sentinel/conf/sentinel.conf 已存在，是否要覆蓋？(y/n)"
     read -r ans
     if [[ "$ans" =~ ^[Yy]$ ]]; then
-      cp "${BASE_DIR}/sentinel.conf" "${BASE_DIR}/sentinel/redis-sentinel/conf/sentinel.conf"
-      success "已覆蓋 sentinel/redis-sentinel/conf/sentinel.conf"
+      if sudo cp "${BASE_DIR}/sentinel.conf" "${BASE_DIR}/sentinel/redis-sentinel/conf/sentinel.conf"; then
+        success "已覆蓋 sentinel/redis-sentinel/conf/sentinel.conf"
+      else
+        error "無法覆蓋 sentinel.conf，可能是權限不足。"
+      fi
     else
       info "使用者選擇不覆蓋 sentinel.conf"
     fi
