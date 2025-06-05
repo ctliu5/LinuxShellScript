@@ -18,10 +18,6 @@ BASE_DIR="$(pwd)"
 REDIS_STACK_IMAGE="redis/redis-stack:7.4.0-v1"
 SENTINEL_IMAGE="bitnami/redis-sentinel:7.4.0"
 LOGROTATE_CONF="/etc/logrotate.d/redis"
-
-# 若要保證每次執行都「重新部署容器」，可將此設定為 "true" (會先移除容器再啟動)
-REMOVE_OLD_CONTAINERS="false"
-
 # ------------------ 函數：顯示訊息 ------------------
 info()    { echo -e "\033[1;34m[Info]  $*\033[0m"; }
 warn()    { echo -e "\033[1;33m[警告] $*\033[0m"; }
@@ -171,6 +167,7 @@ if [ -z "$RUNNING_STACK" ]; then
              -v ${PWD}/redis/pid/:/pid \
              -v ${PWD}/config/redis.conf:/redis-stack.conf \
              --name redis-stack \
+             --restart unless-stopped \
              -p 6379:6379 \
              -p 8001:8001 \
              -d ${REDIS_STACK_IMAGE}
@@ -269,5 +266,4 @@ success "全部步驟完成！\n
 === 最終檢查清單 ===
 1. 請使用 'docker ps' 確認 redis-stack 與 redis-sentinel 兩個容器都在執行。
 2. 若要檢查 logrotate ，可觀察 /var/log/syslog 或手動執行 'sudo logrotate -f ${LOGROTATE_CONF}'。
-3. 若要重新部署，將 REMOVE_OLD_CONTAINERS 設為 'true' 後再執行本腳本。
 "
